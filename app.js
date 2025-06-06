@@ -1,8 +1,9 @@
 import express from "express";
-import { PORT } from "./config/.env.js";
+import { NODE_ENV, PORT } from "./config/.env.js";
 import userRouter from "./routes/user.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
+import connectToDatabase from "./database/mongodb.js";
 
 const app = express();
 
@@ -14,8 +15,14 @@ app.get("/", (req, res) => {
   res.send("Hellooooo");
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`running on http://localhost:${PORT}`);
+  try {
+    await connectToDatabase();
+    console.log(`Connected to database in ${NODE_ENV} mode`);
+  } catch (error) {
+    console.error("Error connecting to database :", error);
+  }
 });
 
 export default app;
