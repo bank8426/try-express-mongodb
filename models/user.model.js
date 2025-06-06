@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { isEmail } from "validator";
+import validator from "validator";
+const { isEmail } = validator;
 
 const userSchema = new mongoose.Schema(
   {
