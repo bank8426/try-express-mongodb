@@ -1,7 +1,6 @@
 const errorMiddleware = (err, req, res, next) => {
   try {
     let error = { ...err };
-
     error.message = err.message;
 
     if (err.name === "CastError") {
@@ -17,7 +16,7 @@ const errorMiddleware = (err, req, res, next) => {
     }
 
     if (err.name === "ValidationError") {
-      const message = Object.values(err.error).map((val) => val.message);
+      const message = Object.values(err.errors).map((val) => val.message);
       error = new Error(message.join(","));
       error.statusCode = 400;
     }

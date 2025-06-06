@@ -21,7 +21,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     frequency: {
       type: String,
-      enum: ["daily", "weekly", " monthly", "yearly"],
+      enum: ["daily", "weekly", "monthly", "yearly"],
     },
     category: {
       type: String,
@@ -58,7 +58,6 @@ const subscriptionSchema = new mongoose.Schema(
     },
     renewalDate: {
       type: Date,
-      required: true,
       validate: {
         validator: function (value) {
           return value > this.startDate;
@@ -85,9 +84,8 @@ subscriptionSchema.pre("save", function (next) {
       monthly: 30,
       yearly: 365,
     };
-    this.renewalDate.setDate(
-      new Date(this.startDate) + renewalPeriods[this.frequency]
-    );
+    this.renewalDate = new Date(this.startDate);
+    this.renewalDate.setDate(this.renewalDate + renewalPeriods[this.frequency]);
   }
 
   // Auto update the status if renewal date has passed
