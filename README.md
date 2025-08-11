@@ -212,21 +212,33 @@ Your server will run on [http://localhost:5500](http://localhost:5500/)
 
 - `nodemailer` can be used for sending email by using your own gmail account for free. But also need to enable `2 step verification` in your gmail account and generate `app password` for it.
 
+<!-- TODO -->
+
+TODO
+ngrok
+register account
+follow step in https://dashboard.ngrok.com/get-started/setup
+run `ngrok http http://localhost:5500` if you use same port as example
+get your `forwarding url` and update it in endpoint url .env file before run `npm run dev`
+
 ## <a name="note">Implementation Notes</a>
 
 - MongoDB Atlas - everytime your IP address changed, you need to add it to the whitelist in the cloud mongodb. By go to https://cloud.mongodb.com/ and click on `Network Access` in `Security` section -> `Add IP Address` -> `Add Current IP Address`. Actually you can allow all IP address by click on `Add IP Address` -> `Allow Access from Anywhere`
 
 - Workflow
+  from https://upstash.com/docs/workflow/troubleshooting/general#authorization-error-handling
 
-  - Workflow method
+the recomendend pattern to check condition is to check it inside Workflow method and return the result instead of check condition in server side then call Workflow method which will make it confuse and throw error like (`Incompatible step name. Expected <STEP_NAME>, got <STEP_NAME>` since it consider as `Updating workflow`).https://upstash.com/docs/workflow/howto/changes
 
-    - `stepName` in this project we called it as `label` since we also use it to check `email template label` when sending email - But since propose of `stepName` is to track current step of `workflow` and it must be `unique`. Then the problem happened
+- Workflow method
 
-      - If you use same label for different workflow method( `run` and `sleepUntil` in this case), it will throw error.
+  - `stepName` in this project we called it as `label` since we also use it to check `email template label` when sending email - But since propose of `stepName` is to track current step of `workflow` and it must be `unique`. Then the problem happened
 
-      - If you use the same label with same workflow method, it will has some weird behavior. (from what i try)
+    - If you use same label for different workflow method( `run` and `sleepUntil` in this case), it will throw error.
 
-    - `stepName` miss
+    - If you use the same label with same workflow method, it will has some weird behavior. (from what i try)
+
+  - `stepName` miss
 
 ## <a name="miss">Missing Features</a>
 

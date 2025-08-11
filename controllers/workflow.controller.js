@@ -29,43 +29,44 @@ export const sendReminders = serve(async (context) => {
 
   for (const minutesBefore of REMINDERS) {
     console.log(`\nProcessing ${minutesBefore} minutes before reminder`);
+    console.log("steps", steps);
     console.log("stepCount", executor.stepCount);
     console.log("planStepCount", executor.planStepCount);
     console.log("executingStep", executor.executingStep);
 
     const reminderDate = renewalDate.subtract(minutesBefore, "minute");
     console.log(
-      "will reminder at: ",
+      "\nwill reminder at: ",
       reminderDate.format("MMM D,YYYY HH:mm:ss")
     );
-    if (dayjs().isBefore(reminderDate, "minute")) {
-      console.log(
-        `inside isBefore for ${minutesBefore} minutes before reminder`
-      );
-      await sleepUntilReminder(
-        context,
-        `${minutesBefore} minutes before reminder`,
-        reminderDate
-      );
-      await triggerReminder(
-        context,
-        `${minutesBefore} minutes before reminder`,
-        subscription
-      );
-    }
+
+    const label = `sleep until ${minutesBefore} minutes before reminder`;
+    console.log("label", label);
+    await context.sleepUntil(label, reminderDate.toDate());
+
+    console.log("stepCount", executor.stepCount);
+    console.log("planStepCount", executor.planStepCount);
+    console.log("executingStep", executor.executingStep);
+    console.log("\n");
+
     // https://upstash.com/docs/workflow/howto/changes
-    else if (dayjs().isSame(reminderDate, "minute")) {
-      console.log(`inside isSame for ${minutesBefore} minutes before reminder`);
-      await triggerReminder(
-        context,
-        `${minutesBefore} minutes before reminder`,
-        subscription
-      );
-    }
+
+    console.log(`inside isSame for ${minutesBefore} minutes before reminder`);
+    await triggerReminder(
+      context,
+      `${minutesBefore} minutes before reminder`,
+      subscription,
+      reminderDate
+    );
+    console.log("triggered");
 
     console.log(
-      `-Finished processing ${minutesBefore} minutes before reminder\n`
+      `\nFinished processing ${minutesBefore} minutes before reminder`
     );
+    console.log("stepCount", executor.stepCount);
+    console.log("planStepCount", executor.planStepCount);
+    console.log("executingStep", executor.executingStep);
+    console.log("\n");
   }
 
   // for (const daysBefore of REMINDERS) {
@@ -95,20 +96,26 @@ const fetchSubscription = async (context, subscriptionId) => {
   });
 };
 
-const sleepUntilReminder = async (context, label, date) => {
-  console.log(`Sleeping until ${label} reminder at ${date}`);
-  await context.sleepUntil(label, date.toDate());
-};
+const triggerReminder = async (context, label, subscription, reminderDate) => {
+  return await context.run(
+    label,
+    async () => {
+      console.log(`Triggering "${label}" reminder`);
 
-const triggerReminder = async (context, label, subscription) => {
-  return await context.run(label, async () => {
-    console.log(`Triggering ${label} reminder`);
+      if (dayjs().isSame(reminderDate, "minute")) {
+        await sendReminderEmail({
+          to: subscription.user.email,
+          type: label,
+          subscription,
+        });
 
-    await sendReminderEmail({
-      to: subscription.user.email,
-      type: label,
-      subscription,
-    });
-    return { message: "Reminder email sent" };
-  });
+        return { message: "Sent" };
+      }
+
+      return { message: "Not sent" };
+    },
+    {
+      retries: 0,
+    }
+  );
 };
