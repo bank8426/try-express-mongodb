@@ -4,10 +4,12 @@ import Subscription from "../models/subscription.model.js";
 
 export const createSubscription = async (req, res, next) => {
   try {
+    console.log("-Create new subscription");
     const subscription = await Subscription.create({
       ...req.body,
       user: req.user._id,
     });
+    console.log("subscriptionId", subscription.id);
 
     const { workflowRunId } = await workflowClient.trigger({
       url: `${SERVER_URL}/api/v1/workflows/subscription/reminder`,
@@ -19,6 +21,7 @@ export const createSubscription = async (req, res, next) => {
       },
       retries: 0,
     });
+    console.log("workflowRunId", workflowRunId);
 
     res
       .status(201)
