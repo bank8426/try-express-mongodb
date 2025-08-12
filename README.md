@@ -17,7 +17,8 @@ This project was implemented based on a tutorial video on YouTube from JS Master
 
 ## <a name="introduction">Introduction</a>
 
-The project idea is to create backend api for subscriptions service and every time when user create a subscription, it will make a workflow to send reminder email to user after certain days before subscription end date.
+Backend API for a subscription management service that sends email reminders to users every notice period before a subscription expires.
+This backend also implements user registration, authentication with JWT, rate limiting, and bot protection.
 
 The reason I wanted to follow this tutorial is that I want to try to learn more about Express.js and MongoDB.
 
@@ -68,9 +69,16 @@ The reason I wanted to follow this tutorial is that I want to try to learn more 
 ## <a name="tech-stack">Tech Stack</a>
 
 - Express - as a backend framework
-- MongoDB Atlas - as a cloud MongoDB database service(free tier)
-- Mongoose - as an Object Data Modeling (ODM) library for `MongoDB`. It's different from ORM (Object Relational Mapping) which is for `SQL database`. Purpose of ODM and ORM is to map the data structure between the database and the application. But on the different data structure.
+
+- MongoDB Atlas - as a cloud MongoDB database service(Free tier)
+
+- Mongoose - as an Object Data Modeling (ODM) library for `MongoDB`. `ODM` is like `ORM`(Object Relational Mapping) but for `NoSQL database`, which is used to map the `Model`'s data structure in the database into an Object class in the application as in Object Oriented Programming (OOP) style. Allow you to call methods from that `Model` class to create, update, delete, and find data in the database without writing a raw query.
+
 - Arcjet - as a middleware for rate limiting, protect from bots and also protect from attacks
+
+<!-- TODO -->
+
+- Upstash (workflow) - as a scheduling queue service, first you call trigger workflow with data(context) and callback url. Then it will call your backend based on callback url.Then your backend need to handle the workflow based on the data(context) that you sent.
 
 1. Server side(create subscription api)
 1. Create new subscription in database and return `subscriptionId`
@@ -85,16 +93,45 @@ The reason I wanted to follow this tutorial is that I want to try to learn more 
 
 in `subscription/reminder` endpoint
 
-- Upstash (workflow) - as a scheduling queue service, first you call trigger workflow with data(context) and callback url. Then it will call your backend based on callback url.Then your backend need to handle the workflow based on the data(context) that you sent.
+<!-- TODO -->
+
 - NPM Libraries
-  - bcryptjs - as a password hashing tool
-  - nodemailer - as an email sending tool( I use personal `gmail` to send email in this project)
-  - validator - as a string validation tool which provide various validation methods for string input(I use it for email validation in this project)
-  - dayjs - as a date and time library
-  - cookie-parser - as a cookie parsing tool
+
+  - bcryptjs - as a password hashing tool,
+
+    - When a user sign up, hash a password before saving it into the database
+    - When a user sign in, verify the user's input password with the hashed password from the database
+
+  - jsonwebtoken - as a JSON Web Token (JWT) tool to
+
+    - When a user sign in, create a JWT token
+    - When a user accesses protected routes, verify the JWT token in the `request header`
+
+  - nodemailer - as an email sending tool for sending email reminders (Use personal `gmail` as a sender)
+
+  - validator - as a string validation tool for email (Actually, it provides various validation methods for string input, not just the email)
+
+  - dayjs - as a date and time library for date comparison and formatting dates and times
+
+  - cookie-parser - as a middleware for a cookie parsing tool. But actually, it's not really used in this project since we use a JWT token in the `Authorization` header. `cookie-parser` was added following a tutorial video. But there are use cases for it when implementing frontend and use `HTTP only cookie` to store JWT token to prevent `XSS attack` and also set `SameSite` to `Strict` to prevent `CSRF attack`.
+
   - nodemon - to restart the server automatically when a file is changed
 
 ## <a name="features">Features</a>
+
+Advanced Rate Limiting and Bot Protection: with Arcjet that helps you secure the whole app.
+
+👉 Database Modeling: Models and relationships using MongoDB & Mongoose.
+
+👉 JWT Authentication: User CRUD operations and subscription management.
+
+👉 Global Error Handling: Input validation and middleware integration.
+
+👉 Logging Mechanisms: For better debugging and monitoring.
+
+👉 Email Reminders: Automating smart email reminders with workflows using Upstash.
+
+and many more, including code architecture and reusability
 
 ## <a name="quick-start">Quick Start</a>
 
@@ -105,6 +142,7 @@ Follow these steps to set up the project locally on your machine.
 - Git
 - Node.js
 - npm
+- ngrok (for handling api callback from workflow to local development server)
 
 **Cloning the Repository**
 
@@ -234,13 +272,13 @@ from https://upstash.com/docs/workflow/troubleshooting/general#authorization-err
 
 also because of using sleepUntil which try to resume workflow from where it left off.
 
-the recomendend pattern to check condition is to check it inside Workflow method and return the result instead of check condition in server side then call Workflow method which will make it confuse and throw error like (`Incompatible step name. Expected <STEP_NAME>, got <STEP_NAME>` since it consider as `Updating workflow`).https://upstash.com/docs/workflow/howto/changes
+The recommended pattern to check the condition is to check it inside the Workflow method and return the result instead of checking the condition on the server side, then calling the Workflow method, which will make it confusing and throw an error like (`Incompatible step name. Expected <STEP_NAME>, got <STEP_NAME> since it is considered as `Updating).https://upstash.com/docs/workflow/howto/changes
 
 - Workflow method
 
-  - `stepName` in this project we called it as `label` since we also use it to check `email template label` when sending email - But since propose of `stepName` is to track current step of `workflow` and it must be `unique`. Then the problem happened
+  - `stepName` in this project, we called it `label` since we also use it to check `email template label` when sending email - But since the purpose of `stepName` iso track current step of `workflow` and it must be `unique`. Then the problem happened
 
-    - If you use same label for different workflow method( `run` and `sleepUntil` in this case), it will throw error.
+    - If you use the same label for different workflow methods( `run` and `sleepUntil` in this case), it will throw error.
 
     - If you use the same label with same workflow method, it will has some weird behavior. (from what i try)
 
