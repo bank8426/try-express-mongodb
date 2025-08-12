@@ -113,7 +113,13 @@ in `subscription/reminder` endpoint
 
   - dayjs - as a date and time library for date comparison and formatting dates and times
 
-  - cookie-parser - as a middleware for a cookie parsing tool. But actually, it's not really used in this project since we use a JWT token in the `Authorization` header. `cookie-parser` was added following a tutorial video. But there are use cases for it when implementing frontend and use `HTTP only cookie` to store JWT token to prevent `XSS attack` and also set `SameSite` to `Strict` to prevent `CSRF attack`.
+  - cookie-parser - as a middleware for a cookie parsing tool. It does nothing in this project since we use a JWT token in the `Authorization` header. `cookie-parser` was added following a tutorial video. But there are use cases for it when implementing `frontend`
+
+    - On `frontend`
+
+      - Use `HTTP only cookie` to store JWT token instead of storing it in `localStorage` to prevent `XSS attack`
+
+      - Set `SameSite` to `Strict` to prevent `CSRF attack`
 
   - nodemon - to restart the server automatically when a file is changed
 
