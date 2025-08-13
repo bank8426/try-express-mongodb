@@ -29,13 +29,13 @@ The reason I wanted to follow this tutorial is that I want to try to learn more 
 #### Sign up
 
 <a href="">
-  <img src="public/readme/sign-up.png" alt="Sign up" />
+  <img src="public/readme/sign-up.png1" alt="Sign up" />
 </a>
 
 #### Sign in
 
 <a href="">
-  <img src="public/readme/sign-in.png" alt="Sign in" />
+  <img src="public/readme/sign-in.png1" alt="Sign in" />
 </a>
 
 ### Users
@@ -43,13 +43,13 @@ The reason I wanted to follow this tutorial is that I want to try to learn more 
 #### Get users
 
 <a href="">
-  <img src="public/readme/get-users.png" alt="Get users" />
+  <img src="public/readme/get-users.png1" alt="Get users" />
 </a>
 
 #### Get user by id
 
 <a href="">
-  <img src="public/readme/get-user-by-id.png" alt="Get user by id" />
+  <img src="public/readme/get-user-by-id.png1" alt="Get user by id" />
 </a>
 
 ### Subscriptions
@@ -57,13 +57,13 @@ The reason I wanted to follow this tutorial is that I want to try to learn more 
 #### Create subscription
 
 <a href="">
-  <img src="public/readme/create-subscription.png" alt="Create subscription" />
+  <img src="public/readme/create-subscription.png1" alt="Create subscription" />
 </a>
 
 #### Get subscriptions by user id
 
 <a href="">
-  <img src="public/readme/get-subscription-by-user-id.png" alt="Get subscription by user id" />
+  <img src="public/readme/get-subscription-by-user-id.png1" alt="Get subscription by user id" />
 </a>
 
 ## <a name="tech-stack">Tech Stack</a>
@@ -76,33 +76,18 @@ The reason I wanted to follow this tutorial is that I want to try to learn more 
 
 - Arcjet - as a middleware for rate limiting, protect from bots and also protect from attacks
 
-<!-- TODO -->
+- Workflow from Upstash - as a messaging and scheduling service with steps tracking feature. Allow you to create an endpoint containing a sequences of steps to execute. And between each steps, you can let it wait until specific time has been passed or specific event has been triggered before continue the code execution without blocking the server thread.
 
-- Upstash (workflow) - as a scheduling queue service, first you call trigger workflow with data(context) and callback url. Then it will call your backend based on callback url.Then your backend need to handle the workflow based on the data(context) that you sent.
-
-1. Server side(create subscription api)
-1. Create new subscription in database and return `subscriptionId`
-1. Call `workflowClient.trigger` with `callback url`(`${SERVER_URL}/subscription/reminder` endpoint) and `subscriptionId` as body to Workflow.
-1. Workflow side
-1. Create `new workflow run` and call `callback url`(`${SERVER_URL}/subscription/reminder` endpoint) with `context` which has `workflowRunId`, `subscriptionId`(in `requestPayload`) and a lot of other information.
-1. Server side(subscription/reminder endpoint) (need to use `serve` function from `@upstash/workflow/express` to handle request)
-1. Extract `subscriptionId` from `context.requestPayload`
-1. call `fetchSubscription` function which will call `context.run` to get `subscription` data by `subscriptionId` from database
-1. Check if `subscription` is `active` and `renewalDate` is not passed
-1. If `subscription` is `active` and `renewalDate` is not passed, it will call `sendReminderEmail` function to send email to user
-
-in `subscription/reminder` endpoint
-
-<!-- TODO -->
+  - In this project, it will execute some steps after specific time has been passed to send email reminders to users.(7,5,2,1 day before subscription renewal date)
 
 - NPM Libraries
 
-  - bcryptjs - as a password hashing tool,
+  - bcryptjs - as a password hashing tool
 
     - When a user sign up, hash a password before saving it into the database
     - When a user sign in, verify the user's input password with the hashed password from the database
 
-  - jsonwebtoken - as a JSON Web Token (JWT) tool to
+  - jsonwebtoken - as a JSON Web Token (JWT) tool
 
     - When a user sign in, create a JWT token
     - When a user accesses protected routes, verify the JWT token in the `request header`
@@ -113,9 +98,9 @@ in `subscription/reminder` endpoint
 
   - dayjs - as a date and time library for date comparison and formatting dates and times
 
-  - cookie-parser - as a middleware for a cookie parsing tool. It does nothing in this project since we use a JWT token in the `Authorization` header. `cookie-parser` was added following a tutorial video. But there are use cases for it when implementing `frontend`
+  - cookie-parser - as a middleware for a cookie parsing tool. Added follow a tutorial video and does nothing in this project since we use a JWT token in the `Authorization` header.
 
-    - On `frontend`
+    - But there are use cases in security when implement `frontend` side
 
       - Use `HTTP only cookie` to store JWT token instead of storing it in `localStorage` to prevent `XSS attack`
 
@@ -125,39 +110,39 @@ in `subscription/reminder` endpoint
 
 ## <a name="features">Features</a>
 
-Advanced Rate Limiting and Bot Protection: with Arcjet that helps you secure the whole app.
+- Advanced Rate Limiting and Bot Protection: with Arcjet that helps you secure the whole app.
 
-👉 Database Modeling: Models and relationships using MongoDB & Mongoose.
+- Database Modeling: Models and relationships using MongoDB & Mongoose.
 
-👉 JWT Authentication: User CRUD operations and subscription management.
+- JWT Authentication: User CRUD operations and subscription management.
 
-👉 Global Error Handling: Input validation and middleware integration.
+- Global Error Handling: Input validation and middleware integration.
 
-👉 Logging Mechanisms: For better debugging and monitoring.
+- Logging Mechanisms: For better debugging and monitoring.
 
-👉 Email Reminders: Automating smart email reminders with workflows using Upstash.
-
-and many more, including code architecture and reusability
+- Email Reminders: Automating smart email reminders with workflows using Upstash.
 
 ## <a name="quick-start">Quick Start</a>
 
 Follow these steps to set up the project locally on your machine.
 
-**Prerequisites**
+### Prerequisites
 
 - Git
 - Node.js
 - npm
-- ngrok (for handling api callback from workflow to local development server)
+- Select one of the following
+  - `ngrok` or "any tunnelling solution" to expose local development server for api callback from workflow
+  - `@upstash/qstash-cli` to run qstash on `local mode` ( They just added `monitoring feature` for `local mode` at the time I writing this README.md. I hope it happen sooner 😅. So local tunneling will not needed when i implementing this project)
 
-**Cloning the Repository**
+### Cloning the Repository
 
 ```bash
 git clone https://github.com/bank8426/try-express-mongodb.git
 cd try-express-mongodb
 ```
 
-**Installation**
+### Installation
 
 Install the project dependencies using npm:
 
@@ -165,61 +150,77 @@ Install the project dependencies using npm:
 npm install
 ```
 
-**Set Up Environment Variables**
+### Set Up Environment Variables
 
 1. Create a new file named `.env.development.local` and copy content inside `.env.example`
 2. Replace the placeholder values with your actual credentials
 
 ```env
-# your base url
-VITE_BASE_URL=http://localhost:5173
+PORT=5500
+# callback url for workflow after they create workflow_id
+SERVER_URL="http://localhost:5500"
+NODE_ENV=
 
-#https://www.syncfusion.com/
-VITE_SYNCFUSION_LICENSE_KEY=
+# https://cloud.mongodb.com/
+DB_URI=
 
-# https://cloud.appwrite.io/
-VITE_APPWRITE_PROJECT_ID=
-VITE_APPWRITE_API_KEY=
-VITE_APPWRITE_DATABASE_ID=
-# create users collection in database
-VITE_APPWRITE_USERS_COLLECTION_ID=
-# create trips collection in database
-VITE_APPWRITE_TRIPS_COLLECTION_ID=
-# it chage based on server region
-VITE_APPWRITE_API_ENDPOINT=
+# jwt secret key can be any string for learning purpose
+JWT_SECRET=
+# check https://www.npmjs.com/package/jsonwebtoken about expiresIn option
+JWT_EXPIRES_IN='1d'
 
-# https://sentry.io/ for using with react-router
-SENTRY_AUTH_TOKEN=
+# https://app.arcjet.com/
+ARCJET_KEY=
+ARCJET_ENV=
 
-# https://aistudio.google.com/
-GEMINI_API_KEY=
+# https://console.upstash.com/workflow/
+# These will be different between running on local and on server
+QSTASH_URL=http://127.0.0.1:8080
+QSTASH_TOKEN=
+QSTASH_CURRENT_SIGNING_KEY=
+QSTASH_NEXT_SIGNING_KEY=
 
-# https://unsplash.com/developers
-UNSPLASH_ACCESS_KEY=
-
-# https://dashboard.stripe.com/test/dashboard
-STRIPE_SECRET_KEY=
+# gmail
+EMAIL_USER=
+# https://myaccount.google.com/u/1/apppasswords
+EMAIL_PASSWORD=
 ```
+
+### Option 1: running ngrok or any tunneling solution
+
+1. Run your tunneling solution
+   <img src="public/readme/ngrok.png" alt="Ngrok" />
+
+2. Replace `SERVER_URL` with your `tunneling or forwarding url`
+3. Get `QSTASH_URL`, `QSTASH_TOKEN`, `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY` from `https://console.upstash.com/workflow/` Quickstart section
+
+### Option 2: running qstash on local mode
+
+1. Click on `Local Mode` button
+   <img src="public/readme/qstash-cli-1.png" alt="Qstash" />
+2. Run
+
+   ```bash
+   npx @upstash/qstash-cli@latest dev
+   ```
+
+   If it working, you will see `Connection Status` like this
+
+   <img src="public/readme/qstash-cli-2.png" alt="Qstash" />
+
+3. Replace `QSTASH_URL` with `http://localhost:8080` in case you run it on port 8080
+4. Get `QSTASH_TOKEN`, `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY` from your terminal or go to
+   `https://console.upstash.com/workflow/` Quickstart section ( values will be changed when you run it on local mode )
 
 **Running the Project**
-
-You will need 2 terminals to run the project if you want to run qstash on local mode.
-
-- First terminal to run qstash
-
-```bash
-npx @upstash/qstash-cli dev
-```
-
-<!-- https://upstash.com/docs/qstash/howto/local-tunnel -->
-
-- Second terminal to run server
 
 ```bash
 npm run dev
 ```
 
 Your server will run on [http://localhost:5500](http://localhost:5500/)
+
+<!-- TODO -->
 
 ## <a name="learn">What I learned</a>
 
@@ -256,6 +257,21 @@ Your server will run on [http://localhost:5500](http://localhost:5500/)
 
 - `nodemailer` can be used for sending email by using your own gmail account for free. But also need to enable `2 step verification` in your gmail account and generate `app password` for it.
 
+first you call trigger workflow with data(context) and callback url. Then it will call your backend based on callback url. Then your backend need to handle the workflow based on the data(context) that you sent.
+
+1. Server side(create subscription api)
+1. Create new subscription in database and return `subscriptionId`
+1. Call `workflowClient.trigger` with `callback url`(`${SERVER_URL}/subscription/reminder` endpoint) and `subscriptionId` as body to Workflow.
+1. Workflow side
+1. Create `new workflow run` and call `callback url`(`${SERVER_URL}/subscription/reminder` endpoint) with `context` which has `workflowRunId`, `subscriptionId`(in `requestPayload`) and a lot of other information.
+1. Server side(subscription/reminder endpoint) (need to use `serve` function from `@upstash/workflow/express` to handle request)
+1. Extract `subscriptionId` from `context.requestPayload`
+1. call `fetchSubscription` function which will call `context.run` to get `subscription` data by `subscriptionId` from database
+1. Check if `subscription` is `active` and `renewalDate` is not passed
+1. If `subscription` is `active` and `renewalDate` is not passed, it will call `sendReminderEmail` function to send email to user
+
+in `subscription/reminder` endpoint
+
 <!-- TODO -->
 
 TODO
@@ -275,6 +291,9 @@ workflow callback
 call everytime after workflow method is called
 
 from https://upstash.com/docs/workflow/troubleshooting/general#authorization-error-handling
+https://upstash.com/docs/workflow/basics/caveats
+
+Problem: time-dependent code
 
 also because of using sleepUntil which try to resume workflow from where it left off.
 
@@ -294,7 +313,7 @@ The recommended pattern to check the condition is to check it inside the Workflo
 
 Auth
 
-- Sign out ( By default, it's done on frontend by just removing token from cookie. To do on backend might need to create new collection for blacklisted tokens)
+- Sign out ( By default, it's done on frontend by just removing token from cookie or localStorage. To do on backend might need to create new collection for blacklisted tokens)
 
 Subscription
 
