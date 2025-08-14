@@ -28,43 +28,45 @@ The reason I wanted to follow this tutorial is that I want to try to learn more 
 
 #### Sign up
 
-<a href="">
-  <img src="public/readme/sign-up.png1" alt="Sign up" />
-</a>
+<img src="public/readme/sign-up.png" alt="Sign up" />
 
 #### Sign in
 
-<a href="">
-  <img src="public/readme/sign-in.png1" alt="Sign in" />
-</a>
+<img src="public/readme/sign-in.png" alt="Sign in" />
 
 ### Users
 
 #### Get users
 
-<a href="">
-  <img src="public/readme/get-users.png1" alt="Get users" />
-</a>
+<img src="public/readme/get-users.png" alt="Get users" />
 
 #### Get user by id
 
-<a href="">
-  <img src="public/readme/get-user-by-id.png1" alt="Get user by id" />
-</a>
+<img src="public/readme/get-user-by-id.png" alt="Get user by id" />
 
 ### Subscriptions
 
 #### Create subscription
 
-<a href="">
-  <img src="public/readme/create-subscription.png1" alt="Create subscription" />
-</a>
+<img src="public/readme/create-subscription.png" alt="Create subscription" />
+
+#### Reminder email when subscription renewal date is close (7,5,2,1 `day` before renewal date)
+
+Noted that i changed the code to send email by 7,5,2,1 `minute` before renewal date for testing purpose
+
+<img src="public/readme/reminder-email.png" alt="Reminder email" />
+
+Example email at 7 day before renewal date
+
+<img src="public/readme/email-7-day.png" alt="Email at 7 day before renewal date" />
+
+Example email at 1 day before renewal date
+
+<img src="public/readme/email-1-day.png" alt="Email at 1 day before renewal date" />
 
 #### Get subscriptions by user id
 
-<a href="">
-  <img src="public/readme/get-subscription-by-user-id.png1" alt="Get subscription by user id" />
-</a>
+<img src="public/readme/get-subscription-by-user-id.png" alt="Get subscription by user id" />
 
 ## <a name="tech-stack">Tech Stack</a>
 
@@ -226,8 +228,8 @@ Your server will run on [http://localhost:5500](http://localhost:5500/)
 
 - `Express.js`
 
-  - `app.use()` is used to mount a middleware function which can use for something like parsing request body, parsing cookie in request header, call 3rd party middleware and also include `Router` when create nested routes
-  - `app.get()/post()/put()/delete()` is used to handle HTTP request but it can add middleware function and chain it as well by adding it as parameter before last callback function.
+  - `app.use()` is used to mount a middleware function which can use for something like parsing request body, parsing cookie in request header, call 3rd party middleware and also `Router` when create nested routes
+  - `app.get()/post()/put()/delete()` is used to handle HTTP request but it can add middleware function and chain it as well by adding it as parameter after route path and before last callback function.
     - Ex.
       ```js
       userRouter.get("/", authorize, getUsers);
@@ -235,27 +237,48 @@ Your server will run on [http://localhost:5500](http://localhost:5500/)
 
 - `Mongoose`
 
-  - when handle create new data into database, you can use `pre` middleware with `save` as a first parameter(method name from Model class of Mongoose) to handle some logic before creating new data. But this can do after you created schema
-    - Ex.
+  - Also has `pre` and `post` middleware for your model's method call. `pre` is middleware that will run before method is called and `post` is middleware that will run after method is called.
+
+    - Example: Before save new data into database, you can run some process before save new data into database.
+
     ```js
-      const yourSchema = new mongoose.Schema({ ... })
-      yourSchema.pre("save", function (next) {
-        ...
-        next();
-      })
-      const YourModel = mongoose.model("YourModel", yourSchema)
+    subscriptionSchema.pre("save", function (next) {
+      if (!this.renewalDate) {
+        const renewalPeriods = {
+          daily: 1,
+          weekly: 7,
+          monthly: 30,
+          yearly: 365,
+        };
+        this.renewalDate = new Date(this.startDate);
+        this.renewalDate.setDate(
+          this.renewalDate.getDate() + renewalPeriods[this.frequency]
+        );
+      }
+      // Auto update the status if renewal date has passed
+      if (this.renewalDate < new Date()) {
+        this.status = "expired";
+      }
+      next();
+    });
     ```
 
-- `arcjet` - there're many rate limiting algorithm that can be use. Token bucket
-  is new to me. It use the idea that each request will consume a token(We can set the number of tokens that each request will consume) and if the token is not available, it will be blocked.
+- `arcjet` - there're many rate limiting algorithm that can be use. `Token bucket` is new to me. It use the idea that each request will consume a token. Each path that request called can cost different amount of tokens. Token will refill after a certain amount of time and has max amount of tokens that can be stored. If the token is not enough, request will be blocked.
 
-- `bcryptjs` can be used for creating salt that will mix with password before hash it to create hashed password that will be saved into database, and also use it to verify hashed password
+- `bcryptjs`
+
+  - can be used for creating salt that will mix with password before hash it to create hashed password that will be saved into database
+  - can be used to verify hashed password with user input password with `bcrypt.compare` method which will run process to make hashed password from user input password and compare it with hashed password in database for us.
 
 - `jsonwebtoken` can be used for creating and verifying JSON Web Tokens (JWT) similor to `jose` library. But this is easier to use.
 
-- `dayjs` is a date and time library that can be used for date comparison and format date and time. Ex. isBefore(), isAfter(), isSame() etc. But need to create dayjs instance first.
+- `dayjs` is a date and time library that can be used for date comparison and formatting dates and times. Ex. isBefore(), isAfter(), isSame() etc.
 
 - `nodemailer` can be used for sending email by using your own gmail account for free. But also need to enable `2 step verification` in your gmail account and generate `app password` for it.
+
+- `workflow` - this one take a while to understand how it works between server side and workflow side since it will call same endpoint multiple times but each time it will have to run code in different `context` based on different point of code it left off and comeback to continue. ( props to ngrok since it make me saw how many times same endpoint has been called. Because on backend side, you will only see logging continue from previous step only and that make me thought it just call backend only once and somehow it continue to update context )
+
+<!-- TODO -->
 
 first you call trigger workflow with data(context) and callback url. Then it will call your backend based on callback url. Then your backend need to handle the workflow based on the data(context) that you sent.
 
@@ -329,3 +352,11 @@ User
 - Create user (No need since when user sign up, it will create user in database, maybe for invitation user case)
 - Update user
 - Delete user (May be soft delete)
+
+Reminder Email
+
+- All link in email is not implemented
+
+```
+
+```
