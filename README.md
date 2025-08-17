@@ -413,7 +413,3 @@ User
 Reminder Email
 
 - All link in email is not implemented
-
-```
-
-```
