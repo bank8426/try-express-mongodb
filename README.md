@@ -276,100 +276,118 @@ Your server will run on [http://localhost:5500](http://localhost:5500/)
 
 - `nodemailer` can be used for sending email by using your own gmail account for free. But also need to enable `2 step verification` in your gmail account and generate `app password` for it.
 
-- `workflow` - this one take a while to understand how it works between server side and workflow side(props to ngrok since it log everytime when any endpoint has been called.) The idea is that on backend must have a callback endpoint to handle request from workflow side using `serve(async (context)=>{...})` function from `@upstash/workflow/express` instead of normal way to handle request like `async (req, res, next)=>{...}`. This `serve` will act as middleware to handle request from workflow side which include `context` that tracking steps of workflow and will use to replicate all previous steps and continue from where it left off. If somehow the replication result in different step than it should be, it will throw error. This can due to how your code handle business logic and result of each step. There is best practice and thing you should avoid to do from https://upstash.com/docs/workflow/basics/caveats. In my case, it because `Time-dependent` code.
+- `workflow` - this one take a while to understand how it works between server side and workflow side(props to ngrok since it log everytime when any endpoint has been called.) The idea is that we need to call to `workflow` to trigger new `workflow run` and our backend must have a callback endpoint to handle that `workflow run` using `serve(async (context)=>{...})` function from `@upstash/workflow/express` instead of normal way to handle request like `async (req, res)=>{...}`. This `serve` will act as middleware to parse the `context` comming with `request` from workflow side that use for tracking steps of workflow and use all result of previous steps(return value from `context.run`) to replicate whole workflow and continue from where it left off. If somehow the replication is result in different step other than it should be, it will throw error. This can due to how your code handle business logic and result of each step. There is best practice and thing you should avoid in https://upstash.com/docs/workflow/basics/caveats. In my case, I got issue with `Time-dependent` code.
 
-  - From tutorial video, we will create condition based on `current time`.
-    - `first condition` - If it not the time to remind yet, it will call `context.sleepUntil` to wait until the right time and continue the work flow again(which will continue down to below condition)
+  - From tutorial video, we will create condition based on `current time` to check if it's the time to remind or not.
+    - `first condition` - If it not the time to remind yet, it will call `context.sleepUntil` to wait until the right time and continue the work flow again(which will continue down to condition below)
     - `second condition` - If it is the time to remind, it will call `context.run` to send reminder email.
 
 It mean that,
 
-1. In the `first run`, the `first condition` is `true`, So the step that run `context.sleepUntil` will excute and point at that `context.sleepUntil` as the lastest step in `context`.
-2. In the `second run` after `context.sleepUntil`, when it try to replicate all steps based on `context`, due to the time passed, `first condition` will be `false`. And got `context.run` instead as the lastest step in `context`. which will conflict with the `first run` since it expect `context.sleepUntil` before continue the process. This will throw error. Like below image
+1. In the `first run`, the `first condition` is `true`, So the step that run `context.sleepUntil` will excute and record that `context.sleepUntil` as the lastest step in `context`.
 
-<img src="public/readme/workflow-error.png" alt="Workflow Error" />
+2. In the `second run` after `context.sleepUntil`, when it try to replicate all steps based on `context`, due to the time passed, `first condition` will be `false` and go through `second condition` directly. Which mean `context.sleepUntil` doesn't exist in this `second run` and got `context.run` as the lastest step instead.
 
-From the start, based on create subscription and send reminder email flow
+3. In the code, in each step that call `context.run/context.sleepUntil`, it will always `validateStep` with the record in `context` to check if it's arrive at same step or not. And since lastest step in each run is different, it will throw error. Like below image. (This problem also considered as modify workflow issue https://upstash.com/docs/workflow/howto/changes#potential-issues)
 
-On `server` side, in create subscription API
+   <img src="public/readme/workflow-error.png" alt="Workflow Error" />
 
-1. Create and save new subscription into database (return with `subscriptionId`)
-2. Trigger new workflow by using `workflowClient.trigger` method with their required information. In this case, there are 2 important information that need to provide which is `url` to our callback endpoint that will handle the request from workflow and `body` contains initial data for first step of workflow (in this case, `subscriptionId`).
-3. If everything is correct, it will return with `workflowRunId`.
-
-On `workflow` side, after `workflowRunId` is created
-
-- It will call our callback endpoint with `context` which tracking current step of workflow and store result of previous step. In this case, `subscriptionId` since it in first step of workflow.
-
-On `server` side, in callback endpoint (subscription/reminder) - ( initial step - `get subscription` )
-
-1. Extract `subscriptionId` from `context.requestPayload`
-2. call `fetchSubscription` function which will call `context.run` which has step name `get subscription` to get `subscription` data by `subscriptionId` from database
-3. after `context.run`, it will send information from `return` back to workflow side and track that it already run `get subscription` step.
-
-On workflow side, after `get subscription` step is run
-
-1. Save result of `get subscription` step into `context`
-2. Call our callback endpoint with new `context`
-
-On `server` side, in callback endpoint (subscription/reminder) - (after`get subscription` - `sleep until 7 days before reminder`)
-
-1. after `context.run` `get subscription` return
-2. I save data in `subscription` variable
-3. Check if `subscription` is `active` and `renewalDate` is not passed
-
-call `triggerReminder` function which will call `context.run` to get `subscription` data by `subscriptionId` from database
-
-1. Create `new workflow run` and call `callback url`(`${SERVER_URL}/subscription/reminder` endpoint) with `context` which has `workflowRunId`, `subscriptionId`(in `requestPayload`) and a lot of other information.
-1. Server side(subscription/reminder endpoint) (need to use `serve` function from `@upstash/workflow/express` to handle request)
-1. Extract `subscriptionId` from `context.requestPayload`
-1. call `fetchSubscription` function which will call `context.run` to get `subscription` data by `subscriptionId` from database
-1. Check if `subscription` is `active` and `renewalDate` is not passed
-1. If `subscription` is `active` and `renewalDate` is not passed, it will call `sendReminderEmail` function to send email to user
-
-in `subscription/reminder` endpoint
-
-Each workflow
-
-And each time context will change based on result of previous step.
-Starting from our server side,
-
-( ) Because on callback endpoint, you will only see logging continue without seeing that there is incoming request from workflow side between each step. Actually we can know if there is incoming request by add middleware to do the logging before continue the process in callback endpoint.
-
-Let explain it with example
-
-From the but each time it will run the code from where it left off from previous step or from the beginning of the code which tracking inside `context` object from workflow side.
+Solution : To fix this issue, we need to check the condition inside the workflow method and return the result instead of checking the condition outside the workflow method.
 
 ## <a name="note">Implementation Notes</a>
 
 - MongoDB Atlas - everytime your IP address changed, you need to add it to the whitelist in the cloud mongodb. By go to https://cloud.mongodb.com/ and click on `Network Access` in `Security` section -> `Add IP Address` -> `Add Current IP Address`. Actually you can allow all IP address by click on `Add IP Address` -> `Allow Access from Anywhere`
 
-- Workflow
+- Workflow - Please see in `What I learned` section since it also important to know when implement feature using workflow. In this part i will try to explain the whole process of create subscription and send reminder email flow and what happened on each side.
 
-workflow callback
-call everytime after workflow method is called
+**Example create subscription and send reminder email flow**
 
-from https://upstash.com/docs/workflow/troubleshooting/general#authorization-error-handling
-https://upstash.com/docs/workflow/basics/caveats
+**Noted that**
 
-Problem: time-dependent code
+1. I changed unit from `day` to `minute` for testing purpose
+2. Everytime endpoint has been called, it replicate all previous steps until it arrive at the code where it left off.
 
-also because of using sleepUntil which try to resume workflow from where it left off.
+**1A.** On `server` side, in create subscription API
 
-The recommended pattern to check the condition is to check it inside the Workflow method and return the result instead of checking the condition on the server side, then calling the Workflow method, which will make it confusing and throw an error like (`Incompatible step name. Expected <STEP_NAME>, got <STEP_NAME> since it is considered as `Updating).https://upstash.com/docs/workflow/howto/changes
+1. Create and save new subscription into database (return with `subscriptionId`)
+2. Trigger new workflow by using `workflowClient.trigger` method with their required information. In this case, there are 2 important information that need to provide which is `url` to our callback endpoint that will handle the request from workflow and `body` contains initial data for first step of workflow (in this case, `subscriptionId`).
+3. If everything is correct, it will return with `workflowRunId`.
 
-- Workflow method
+**1B.** On `workflow` side, after `workflowRunId` is created
 
-  - `stepName` in this project, we called it `label` since we also use it to check `email template label` when sending email - But since the purpose of `stepName` iso track current step of `workflow` and it must be `unique`. Then the problem happened
+- It will call our callback endpoint with `context` which tracking current step of workflow and store result of previous step. In this case, `subscriptionId` since it in first step of workflow.
 
-    - If you use the same label for different workflow methods( `run` and `sleepUntil` in this case), it will throw error.
+<img src="public/readme/workflow-call1.png" alt="Workflow Call" />
 
-    - If you use the same label with same workflow method, it will has some weird behavior. (from what i try)
+**2A.** On `server` side, in callback endpoint (subscription/reminder) - ( initial step - `get subscription` )
 
-  - `stepName` miss
+1. Extract `subscriptionId` from `context.requestPayload`
+2. call `fetchSubscription` function which will call `context.run` which has step name `get subscription` to get `subscription` data by `subscriptionId` from database
+3. after `context.run`, it will send information from `return` back to workflow side and track that it already run `get subscription` step.
 
-  1. Server side(subscription/reminder endpoint) (need to use `serve` function from `@upstash/workflow/express` to handle request)
-  <!-- TODO -->
+<img src="public/readme/workflow-call2.png" alt="Workflow Call" />
+
+**2B.** On `workflow` side, after `get subscription` step is run
+
+1. Save result of `get subscription` step into `context`
+2. Call our callback endpoint with new `context`
+
+**3A.** On `server` side, in callback endpoint (subscription/reminder) - (after`get subscription` - `sleep until 7 days before reminder`)
+
+1. after `context.run` `get subscription` return
+2. I save data in `subscription` variable
+3. Check if `subscription` is `active` and `renewalDate` is not passed
+4. It will go inside `for` loop to check each `dayBefore` in `REMINDERS` array [7,5,2,1] starting from `7 days before`
+5. Call `context.sleepUntil` with `sleep until 7 days before reminder` to wait until 7 days before renewal date
+6. after `context.sleepUntil`, it will send information back to workflow side and track that it already run `sleep until 7 days before reminder` step.
+
+<img src="public/readme/workflow-call3.png" alt="Workflow Call" />
+
+**3B.** On `workflow` side, after `sleep until 7 days before reminder` step is run
+
+1. Wait until expected time
+2. Call our callback endpoint with new `context`
+
+**4A.** On `server` side, in callback endpoint (subscription/reminder) - (`sleep until 7 days before reminder` - `7 days before reminder`)
+
+1. call `triggerReminder` function which will call `context.run` with `7 days before reminder` to send 7 days reminder email
+2. after `context.run`, it will send information from `return` back to workflow side and track that it already run `7 days before reminder` step.
+
+<img src="public/readme/workflow-call4.png" alt="Workflow Call" />
+
+**4B.** On `workflow` side, after `7 days before reminder` step is run
+
+1. Save result of `7 days before reminder` step into `context`
+2. Call our callback endpoint with new `context`
+
+**5A.** On `server` side, in callback endpoint (subscription/reminder) - (`7 days before reminder` - `sleep until 5 days before reminder`)
+
+1. It will start the second round of `for` loop, check each `dayBefore` in `REMINDERS` array [7,5,2,1] which is `5 days before`
+2. Call `context.sleepUntil` with `sleep until 5 days before reminder` to wait until 5 days before renewal date
+3. after `context.sleepUntil`, it will send information back to workflow side and track that it already run `sleep until 5 days before reminder` step.
+
+<img src="public/readme/workflow-call5.png" alt="Workflow Call" />
+
+**5B.** On `workflow` side, after `sleep until 5 days before reminder` step is run
+
+1. Wait until expected time
+2. Call our callback endpoint with new `context`
+
+**6A.** On `server` side, in callback endpoint (subscription/reminder) - (`sleep until 5 days before reminder` - `5 days before reminder`)
+
+1. call `triggerReminder` function which will call `context.run` with `5 days before reminder` to send 5 days reminder email
+2. after `context.run`, it will send information from `return` back to workflow side and track that it already run `5 days before reminder` step.
+
+<img src="public/readme/workflow-call6.png" alt="Workflow Call" />
+
+**6B.** On `workflow` side, after `5 days before reminder` step is run
+
+1. Save result of `5 days before reminder` step into `context`
+2. Call our callback endpoint with new `context`
+
+**7.** Then continue the whole loop for 2 day and 1 day before reminder for both server and workflow side.
+
+<img src="public/readme/workflow-end.png" alt="Workflow Call" />
 
 ## <a name="miss">Missing Features</a>
 
