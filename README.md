@@ -52,19 +52,19 @@ The reason I wanted to follow this tutorial is that I want to try to learn more 
 
 #### Reminder email when subscription renewal date is close (7,5,2,1 `day` before renewal date)
 
-Noted that i changed the code to send email by 7,5,2,1 `minute` before renewal date for testing purpose
+Noted that I changed the code to send email by 7,5,2,1 `minute` before renewal date for testing purposes
 
 <img src="public/readme/reminder-email.png" alt="Reminder email" />
 
-Example email at 7 day before renewal date
+Example email at 7 days before the renewal date
 
-<img src="public/readme/email-7-day.png" alt="Email at 7 day before renewal date" />
+<img src="public/readme/email-7-day.png" alt="Email at 7 days before renewal date" />
 
 Example email at 1 day before renewal date
 
 <img src="public/readme/email-1-day.png" alt="Email at 1 day before renewal date" />
 
-#### Get subscriptions by user id
+#### Get subscriptions by user ID
 
 <img src="public/readme/get-subscription-by-user-id.png" alt="Get subscription by user id" />
 
@@ -74,24 +74,24 @@ Example email at 1 day before renewal date
 
 - MongoDB Atlas - as a cloud MongoDB database service(Free tier)
 
-- Mongoose - as an Object Data Modeling (ODM) library for `MongoDB`. `ODM` is like `ORM`(Object Relational Mapping) but for `NoSQL database`, which is used to map the `Model`'s data structure in the database into an Object class in the application as in Object Oriented Programming (OOP) style. Allow you to call methods from that `Model` class to create, update, delete, and find data in the database without writing a raw query.
+- Mongoose - as an Object Data Modeling (ODM) library for `MongoDB`. `ODM` is like `ORM`(Object Relational Mapping) but for `NoSQL database`, which is used to map the `Model`'s data structure in the database into an Object class in the application, as in Object Oriented Programming (OOP) style. Allow you to call methods from that `Model` class to create, update, delete, and find data in the database without writing a raw query.
 
-- Arcjet - as a middleware for rate limiting, protect from bots and also protect from attacks
+- Arcjet - as a middleware for rate limiting, protects from bots, and also protects from attacks
 
-- Workflow from Upstash - as a messaging and scheduling service with steps tracking feature. Allow you to create an endpoint containing a sequences of steps to execute. And between each steps, you can let it wait until specific time has been passed or specific event has been triggered before continue the code execution without blocking the server thread.
+- Workflow from Upstash - as a messaging and scheduling service with a step tracking feature. Allows you to create an endpoint containing a sequence of steps to execute. And between each step, you can let it wait until a specific time has passed or a specific event has been triggered before continuing the code execution without blocking the server thread.
 
-  - In this project, it will execute some steps after specific time has been passed to send email reminders to users.(7,5,2,1 day before subscription renewal date)
+  - In this project, it will execute some steps after a specific time has passed to send email reminders to users. (7,5,2,1 day before subscription renewal date)
 
 - NPM Libraries
 
   - bcryptjs - as a password hashing tool
 
-    - When a user sign up, hash a password before saving it into the database
-    - When a user sign in, verify the user's input password with the hashed password from the database
+    - When a user signs up, hash a password before saving it into the database
+    - When a user signs in, verify the user's input password with the hashed password from the database
 
   - jsonwebtoken - as a JSON Web Token (JWT) tool
 
-    - When a user sign in, create a JWT token
+    - When a user signs in, create a JWT token
     - When a user accesses protected routes, verify the JWT token in the `request header`
 
   - nodemailer - as an email sending tool for sending email reminders (Use personal `gmail` as a sender)
@@ -100,9 +100,9 @@ Example email at 1 day before renewal date
 
   - dayjs - as a date and time library for date comparison and formatting dates and times
 
-  - cookie-parser - as a middleware for a cookie parsing tool. Added follow a tutorial video and does nothing in this project since we use a JWT token in the `Authorization` header.
+  - cookie-parser - as a middleware for a cookie parsing tool. Added to follow a tutorial video, and does nothing in this project since we use a JWT token in the `Authorization` header.
 
-    - But there are use cases in security when implement `frontend` side
+    - But there are use cases in security when implementing the `frontend` side
 
       - Use `HTTP only cookie` to store JWT token instead of storing it in `localStorage` to prevent `XSS attack`
 
@@ -112,7 +112,7 @@ Example email at 1 day before renewal date
 
 ## <a name="features">Features</a>
 
-- Advanced Rate Limiting and Bot Protection: with Arcjet that helps you secure the whole app.
+- Advanced Rate Limiting and Bot Protection: with Arcjet, which helps you secure the whole app.
 
 - Database Modeling: Models and relationships using MongoDB & Mongoose.
 
@@ -134,8 +134,8 @@ Follow these steps to set up the project locally on your machine.
 - Node.js
 - npm
 - Select one of the following
-  - `ngrok` or "any tunnelling solution" to expose local development server for api callback from workflow
-  - `@upstash/qstash-cli` to run qstash on `local mode` ( They just added `monitoring feature` for `local mode` at the time I writing this README.md. I hope it happen sooner 😅. So local tunneling will not needed when i implementing this project)
+  - `ngrok` or "any tunnelling solution" to expose the local development server for api callback from workflow
+  - `@upstash/qstash-cli` to run qstash on `local mode` ( They just added `monitoring feature` for `local mode` at the time I was writing this README.md. I hope it happens sooner 😅. So local tunneling will not be needed when I implement this project)
 
 ### Cloning the Repository
 
@@ -154,7 +154,7 @@ npm install
 
 ### Set Up Environment Variables
 
-1. Create a new file named `.env.development.local` and copy content inside `.env.example`
+1. Create a new file named `.env.development.local` and copy the content inside `.env.example`
 2. Replace the placeholder values with your actual credentials
 
 ```env
@@ -166,7 +166,7 @@ NODE_ENV=
 # https://cloud.mongodb.com/
 DB_URI=
 
-# jwt secret key can be any string for learning purpose
+# jwt secret key can be any string for learning purposes
 JWT_SECRET=
 # check https://www.npmjs.com/package/jsonwebtoken about expiresIn option
 JWT_EXPIRES_IN='1d'
@@ -176,7 +176,7 @@ ARCJET_KEY=
 ARCJET_ENV=
 
 # https://console.upstash.com/workflow/
-# These will be different between running on local and on server
+# These will be different between running on local and on the server
 QSTASH_URL=http://127.0.0.1:8080
 QSTASH_TOKEN=
 QSTASH_CURRENT_SIGNING_KEY=
@@ -196,9 +196,9 @@ EMAIL_PASSWORD=
 2. Replace `SERVER_URL` with your `tunneling or forwarding url`
 3. Get `QSTASH_URL`, `QSTASH_TOKEN`, `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY` from `https://console.upstash.com/workflow/` Quickstart section
 
-### Option 2: running qstash on local mode
+### Option 2: running qstash in local mode
 
-1. Click on `Local Mode` button
+1. Click on the `Local Mode` button
    <img src="public/readme/qstash-cli-1.png" alt="Qstash" />
 2. Run
 
@@ -206,13 +206,13 @@ EMAIL_PASSWORD=
    npx @upstash/qstash-cli@latest dev
    ```
 
-   If it working, you will see `Connection Status` like this
+   If it is working, you will see `Connection Status` like this.
 
    <img src="public/readme/qstash-cli-2.png" alt="Qstash" />
 
 3. Replace `QSTASH_URL` with `http://localhost:8080` in case you run it on port 8080
 4. Get `QSTASH_TOKEN`, `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY` from your terminal or go to
-   `https://console.upstash.com/workflow/` Quickstart section ( values will be changed when you run it on local mode )
+   `https://console.upstash.com/workflow/` Quickstart section ( values will be changed when you run it in local mode )
 
 **Running the Project**
 
@@ -228,8 +228,8 @@ Your server will run on [http://localhost:5500](http://localhost:5500/)
 
 - `Express.js`
 
-  - `app.use()` is used to mount a middleware function which can use for something like parsing request body, parsing cookie in request header, call 3rd party middleware and also `Router` when create nested routes
-  - `app.get()/post()/put()/delete()` is used to handle HTTP request but it can add middleware function and chain it as well by adding it as parameter after route path and before last callback function.
+  - `app.use()` is used to mount a middleware function, which can be used for something like parsing the request body, parsing `cookie` in the request header, calling 3rd party middleware, and also `Router` when creating nested routes
+  - `app.get()/post()/put()/delete()` is used to handle HTTP request, but it can add a middleware function and chain it as well by adding it as a parameter after the route path and before the last callback function.
     - Ex.
       ```js
       userRouter.get("/", authorize, getUsers);
@@ -237,9 +237,9 @@ Your server will run on [http://localhost:5500](http://localhost:5500/)
 
 - `Mongoose`
 
-  - Also has `pre` and `post` middleware for your model's method call. `pre` is middleware that will run before method is called and `post` is middleware that will run after method is called.
+  - Also has `pre` and `post` middleware for your model's method call. `pre` is middleware that will run before the method is called, and `post` is middleware that will run after the method is called.
 
-    - Example: Before save new data into database, you can run some process before save new data into database.
+    - Example: Before saving new data into the database, you can run some process or update some data.
 
     ```js
     subscriptionSchema.pre("save", function (next) {
@@ -263,129 +263,129 @@ Your server will run on [http://localhost:5500](http://localhost:5500/)
     });
     ```
 
-- `arcjet` - there're many rate limiting algorithm that can be use. `Token bucket` is new to me. It use the idea that each request will consume a token. Each path that request called can cost different amount of tokens. Token will refill after a certain amount of time and has max amount of tokens that can be stored. If the token is not enough, request will be blocked.
+- `arcjet` - There are many rate-limiting algorithms that can be used. `Token bucket` is new to me. It uses the idea that each request will consume a token. Each path that is requested can cost different amount of tokens. The token will refill after a certain amount of time and has a maximum number of tokens that can be stored. If the token is not enough, the request will be blocked.
 
 - `bcryptjs`
 
-  - can be used for creating salt that will mix with password before hash it to create hashed password that will be saved into database
-  - can be used to verify hashed password with user input password with `bcrypt.compare` method which will run process to make hashed password from user input password and compare it with hashed password in database for us.
+  - can be used for creating salt that will mix with the password before hashing it to create a hashed password that will be saved in the database
+  - can be used to verify a hashed password with the user input password with the `bcrypt.compare` method, which will run a process to make a hashed password from the user input password and compare it with hashed password in the database for us.
 
-- `jsonwebtoken` can be used for creating and verifying JSON Web Tokens (JWT) similor to `jose` library. But this is easier to use.
+- `jsonwebtoken` can be used for creating and verifying JSON Web Tokens (JWT) similar to the `jose` library. But this is easier to use.
 
 - `dayjs` is a date and time library that can be used for date comparison and formatting dates and times. Ex. isBefore(), isAfter(), isSame() etc.
 
-- `nodemailer` can be used for sending email by using your own gmail account for free. But also need to enable `2 step verification` in your gmail account and generate `app password` for it.
+- `nodemailer` can be used for sending email by using your own Gmail account for free. But also need to enable `2 step verification` in your gmail account and generate an `app password` for it.
 
-- `workflow` - this one take a while to understand how it works between server side and workflow side(props to ngrok since it log everytime when any endpoint has been called.) The idea is that we need to call to `workflow` to trigger new `workflow run` and our backend must have a callback endpoint to handle that `workflow run` using `serve(async (context)=>{...})` function from `@upstash/workflow/express` instead of normal way to handle request like `async (req, res)=>{...}`. This `serve` will act as middleware to parse the `context` comming with `request` from workflow side that use for tracking steps of workflow and use all result of previous steps(return value from `context.run`) to replicate whole workflow and continue from where it left off. If somehow the replication is result in different step other than it should be, it will throw error. This can due to how your code handle business logic and result of each step. There is best practice and thing you should avoid in https://upstash.com/docs/workflow/basics/caveats. In my case, I got issue with `Time-dependent` code.
+- `workflow` - this one takes a while to understand how it works between server side and workflow side(props to ngrok since it logs whenever any endpoint has been called.) The idea is that we need to call to `workflow` to trigger new `workflow run` and our backend must have a callback endpoint to handle that `workflow run` using `serve(async (context)=>{...})` function from `@upstash/workflow/express` instead of normal way to handle request like `async (req, res)=>{...}`. This `serve` will act as middleware to parse the `context` coming with `request` from the workflow side that uses for tracking steps of workflow and use all results of previous steps(return value from `context.run`) to replicate the whole workflow and continue from where it left off. If somehow the replication results in a different step than it should be, it will throw an error. This can be due to how your code handles business logic and the result of each step. There is a best practice and a thing you should avoid in https://upstash.com/docs/workflow/basics/caveats. In my case, I have an issue with `Time-dependent` code.
 
-  - From tutorial video, we will create condition based on `current time` to check if it's the time to remind or not.
-    - `first condition` - If it not the time to remind yet, it will call `context.sleepUntil` to wait until the right time and continue the work flow again(which will continue down to condition below)
-    - `second condition` - If it is the time to remind, it will call `context.run` to send reminder email.
+  - From the tutorial video, we will create a condition based on `current time` to check if it's time to remind or not.
+    - `first condition` - If it is not the time to remind yet, it will call `context.sleepUntil` to wait until the right time and continue the workflow again(which will continue down to the condition below)
+    - `second condition` - If it is time to remind, it will call `context.run` to send a reminder email.
 
-It mean that,
+It means that,
 
-1. In the `first run`, the `first condition` is `true`, So the step that run `context.sleepUntil` will excute and record that `context.sleepUntil` as the lastest step in `context`.
+1. In the `first run`, the `first condition` is `true`, so the step that runs `context.sleepUntil` will execute and record that `context.sleepUntil` as the last step in `context`.
 
-2. In the `second run` after `context.sleepUntil`, when it try to replicate all steps based on `context`, due to the time passed, `first condition` will be `false` and go through `second condition` directly. Which mean `context.sleepUntil` doesn't exist in this `second run` and got `context.run` as the lastest step instead.
+2. In the `second run` after `context.sleepUntil`, when it tries to replicate all steps based on `context`, due to the time passed, `first condition` will be `false` and go through `second condition` directly. Which means `context.sleepUntil` doesn't exist in this `second run` and got `context.run` as the last step instead.
 
-3. In the code, in each step that call `context.run/context.sleepUntil`, it will always `validateStep` with the record in `context` to check if it's arrive at same step or not. And since lastest step in each run is different, it will throw error. Like below image. (This problem also considered as modify workflow issue https://upstash.com/docs/workflow/howto/changes#potential-issues)
+3. In the code, in each step that calls `context.run/context.sleepUntil`, it will always `validateStep` with the record in `context` to check if it has arrived at the same step or not. And since the last step in each run is different, it will throw an error. Like the image below. (This problem is also considered as a modified workflow issue https://upstash.com/docs/workflow/howto/changes#potential-issues)
 
    <img src="public/readme/workflow-error.png" alt="Workflow Error" />
 
-Solution : To fix this issue, we need to check the condition inside the workflow method and return the result instead of checking the condition outside the workflow method.
+Solution: To fix this issue, we need to check the condition inside the workflow method and return the result instead of checking the condition outside the workflow method.
 
 ## <a name="note">Implementation Notes</a>
 
-- MongoDB Atlas - everytime your IP address changed, you need to add it to the whitelist in the cloud mongodb. By go to https://cloud.mongodb.com/ and click on `Network Access` in `Security` section -> `Add IP Address` -> `Add Current IP Address`. Actually you can allow all IP address by click on `Add IP Address` -> `Allow Access from Anywhere`
+- MongoDB Atlas - every time your IP address changes, you need to add it to the whitelist in the cloud MongoDB. Go to https://cloud.mongodb.com/ and click on `Network Access` in the `Security` section -> `Add IP Address` -> `Add Current IP Address`. You can allow all IP addresses by clicking on `Add IP Address` -> `Allow Access from Anywhere`
 
-- Workflow - Please see in `What I learned` section since it also important to know when implement feature using workflow. In this part i will try to explain the whole process of create subscription and send reminder email flow and what happened on each side.
+- Workflow - Please see in the `What I learned` section, since it is also important to know when to implement a feature using workflow. In this part, I will try to explain the whole process of creating a subscription and sending a reminder email flow, and what happened on each side.
 
 **Example create subscription and send reminder email flow**
 
 **Noted that**
 
-1. I changed unit from `day` to `minute` for testing purpose
-2. Everytime endpoint has been called, it replicate all previous steps until it arrive at the code where it left off.
+1. I changed the unit from `day` to `minute` for testing purposes
+2. Every time an endpoint has been called, it replicates all previous steps until it arrives at the code where it left off.
 
-**1A.** On `server` side, in create subscription API
+**1A.** On the `server` side, in the create subscription API
 
-1. Create and save new subscription into database (return with `subscriptionId`)
-2. Trigger new workflow by using `workflowClient.trigger` method with their required information. In this case, there are 2 important information that need to provide which is `url` to our callback endpoint that will handle the request from workflow and `body` contains initial data for first step of workflow (in this case, `subscriptionId`).
+1. Create and save a new subscription in the database (return with `subscriptionId`)
+2. Trigger new workflow by using `workflowClient.trigger` method with their required information. In this case, there are 2 important information that need to be provided, which are `url` to our callback endpoint that will handle the request from workflow, and `body` contains initial data for the first step of workflow (in this case, `subscriptionId`).
 3. If everything is correct, it will return with `workflowRunId`.
 
-**1B.** On `workflow` side, after `workflowRunId` is created
+**1B.** On the `workflow` side, after the `workflowRunId` is created
 
-- It will call our callback endpoint with `context` which tracking current step of workflow and store result of previous step. In this case, `subscriptionId` since it in first step of workflow.
+- It will call our callback endpoint with `context`, which tracks the current step of the workflow and stores the result of the previous step. In this case, `subscriptionId` since it is in the first step of the workflow.
 
 <img src="public/readme/workflow-call1.png" alt="Workflow Call" />
 
-**2A.** On `server` side, in callback endpoint (subscription/reminder) - ( initial step - `get subscription` )
+**2A.** On the `server` side, in the callback endpoint (subscription/reminder) - ( initial step - `get subscription` )
 
 1. Extract `subscriptionId` from `context.requestPayload`
-2. call `fetchSubscription` function which will call `context.run` which has step name `get subscription` to get `subscription` data by `subscriptionId` from database
-3. after `context.run`, it will send information from `return` back to workflow side and track that it already run `get subscription` step.
+2. call the `fetchSubscription` function, which will call `context.run`, which has a step name `get subscription` to get `subscription` data by `subscriptionId` from the database
+3. After `context.run`, it will send information from `return` back to the workflow side and track that it has already run the `get subscription` step.
 
 <img src="public/readme/workflow-call2.png" alt="Workflow Call" />
 
-**2B.** On `workflow` side, after `get subscription` step is run
+**2B.** On the `workflow` side, after the `get subscription` step is run
 
-1. Save result of `get subscription` step into `context`
-2. Call our callback endpoint with new `context`
+1. Save the result of the `get subscription` step into `context`
+2. Call our callback endpoint with the new `context`
 
-**3A.** On `server` side, in callback endpoint (subscription/reminder) - (after`get subscription` - `sleep until 7 days before reminder`)
+**3A.** On the `server` side, in callback endpoint (subscription/reminder) - (after`get subscription` - `sleep until 7 days before reminder`)
 
 1. after `context.run` `get subscription` return
-2. I save data in `subscription` variable
+2. I save data in the `subscription` variable
 3. Check if `subscription` is `active` and `renewalDate` is not passed
-4. It will go inside `for` loop to check each `dayBefore` in `REMINDERS` array [7,5,2,1] starting from `7 days before`
+4. It will go inside a `for` loop to check each `dayBefore` in `REMINDERS` array [7,5,2,1], starting from `7 days before`
 5. Call `context.sleepUntil` with `sleep until 7 days before reminder` to wait until 7 days before renewal date
-6. after `context.sleepUntil`, it will send information back to workflow side and track that it already run `sleep until 7 days before reminder` step.
+6. After `context.sleepUntil`, it will send information back to the workflow side and track that it has already run `sleep until 7 days before reminder` step.
 
 <img src="public/readme/workflow-call3.png" alt="Workflow Call" />
 
-**3B.** On `workflow` side, after `sleep until 7 days before reminder` step is run
+**3B.** On the `workflow` side, after the `sleep until 7 days before reminder` step is run
 
-1. Wait until expected time
-2. Call our callback endpoint with new `context`
+1. Wait until the expected time
+2. Call our callback endpoint with the new `context`
 
-**4A.** On `server` side, in callback endpoint (subscription/reminder) - (`sleep until 7 days before reminder` - `7 days before reminder`)
+**4A.** On the `server` side, in callback endpoint (subscription/reminder) - (`sleep until 7 days before reminder` - `7 days before reminder`)
 
-1. call `triggerReminder` function which will call `context.run` with `7 days before reminder` to send 7 days reminder email
-2. after `context.run`, it will send information from `return` back to workflow side and track that it already run `7 days before reminder` step.
+1. call `triggerReminder` function, which will call `context.run` with `7 days before reminder` to send 7 days reminder email
+2. After `context.run`, it will send information from `return` back to the workflow side and track that it has already run `7 days before reminder` step.
 
 <img src="public/readme/workflow-call4.png" alt="Workflow Call" />
 
-**4B.** On `workflow` side, after `7 days before reminder` step is run
+**4B.** On the `workflow` side, after the `7 days before reminder` step is run
 
-1. Save result of `7 days before reminder` step into `context`
-2. Call our callback endpoint with new `context`
+1. Save the result of `7 days before reminder` step into the `context`
+2. Call our callback endpoint with the new `context`
 
-**5A.** On `server` side, in callback endpoint (subscription/reminder) - (`7 days before reminder` - `sleep until 5 days before reminder`)
+**5A.** On the `server` side, in callback endpoint (subscription/reminder) - (`7 days before reminder` - `sleep until 5 days before reminder`)
 
-1. It will start the second round of `for` loop, check each `dayBefore` in `REMINDERS` array [7,5,2,1] which is `5 days before`
+1. It will start the second round of `for` loop, check each `dayBefore` in `REMINDERS` array [7,5,2,1], which is `5 days before`
 2. Call `context.sleepUntil` with `sleep until 5 days before reminder` to wait until 5 days before renewal date
-3. after `context.sleepUntil`, it will send information back to workflow side and track that it already run `sleep until 5 days before reminder` step.
+3. After `context.sleepUntil`, it will send information back to the workflow side and track that it has already run `sleep until 5 days before reminder` step.
 
 <img src="public/readme/workflow-call5.png" alt="Workflow Call" />
 
-**5B.** On `workflow` side, after `sleep until 5 days before reminder` step is run
+**5B.** On the `workflow` side, after the `sleep until 5 days before reminder` step is run
 
-1. Wait until expected time
-2. Call our callback endpoint with new `context`
+1. Wait until the expected time
+2. Call our callback endpoint with the new `context`
 
-**6A.** On `server` side, in callback endpoint (subscription/reminder) - (`sleep until 5 days before reminder` - `5 days before reminder`)
+**6A.** On the `server` side, in callback endpoint (subscription/reminder) - (`sleep until 5 days before reminder` - `5 days before reminder`)
 
-1. call `triggerReminder` function which will call `context.run` with `5 days before reminder` to send 5 days reminder email
-2. after `context.run`, it will send information from `return` back to workflow side and track that it already run `5 days before reminder` step.
+1. call `triggerReminder` function, which will call `context.run` with `5 days before reminder` to send 5 days reminder email
+2. After `context.run`, it will send information from `return` back to the workflow side and track that it has already run `5 days before reminder` step.
 
 <img src="public/readme/workflow-call6.png" alt="Workflow Call" />
 
-**6B.** On `workflow` side, after `5 days before reminder` step is run
+**6B.** On the `workflow` side, after the `5 days before reminder` step is run
 
-1. Save result of `5 days before reminder` step into `context`
-2. Call our callback endpoint with new `context`
+1. Save the result of the `5 days before reminder` step into `context`
+2. Call our callback endpoint with the new `context`
 
-**7.** Then continue the whole loop for 2 day and 1 day before reminder for both server and workflow side.
+**7.** Then continue the whole loop for 2 days and 1 day before the reminder for both the server and workflow side.
 
 <img src="public/readme/workflow-end.png" alt="Workflow Call" />
 
@@ -393,23 +393,23 @@ Solution : To fix this issue, we need to check the condition inside the workflow
 
 Auth
 
-- Sign out ( By default, it's done on frontend by just removing token from cookie or localStorage. To do on backend might need to create new collection for blacklisted tokens)
+- Sign out ( By default, it's done on the frontend by just removing the token from cookie or localStorage. To do so on the backend might need to create a new collection for blacklisted tokens)
 
 Subscription
 
 - Get all subscriptions
-- Get subscription details by subscription id
+- Get subscription details by subscription ID
 - Update subscription
 - Cancel subscription
-- Delete subscription (May be soft delete)
+- Delete subscription (Maybe soft delete)
 - Get upcoming renewal
 
 User
 
-- Create user (No need since when user sign up, it will create user in database, maybe for invitation user case)
+- Create user (No need since when a user signs up, it will create a user in the database, maybe for the invitation user case)
 - Update user
-- Delete user (May be soft delete)
+- Delete user (Maybe soft delete)
 
 Reminder Email
 
-- All link in email is not implemented
+- All link in the email is not implemented
